@@ -1,51 +1,41 @@
 #pragma once
 #include <iostream>
 class ParticleClass {
-
-	//struct cylinder {
-
-	//};
-	//struct sphere {
-	//	float center;
-	//	float radius;
-
-	//};
-
-	//struct square {
-	//	float v1, v2, v3, v4;
-	//};
-
-	//square* planos;
-	//cylinder* cilindro;
-	//sphere* esfera;
+private:
+	class Plane {
+	public:
+		float d;
+		float nx, ny, nz;
+		Plane() {
+			d = nx = ny = nz = 0;
+		}
+		Plane(float d,float nx, float ny, float nz) {
+			this->nx = nx;
+			this->ny = ny;
+			this->nz = nz;
+			this->d = d;
+		}
+	};
 public:
-	float x, y, z;
-	float vx, vy, vz;
-	float mass;
+	float orgX, orgY, orgZ;//Atributos iniciales de posicion
+	float x, y, z; //Atributos de posición
+	float vx, vy, vz; //Atributos de velocidad
+	float timeAlive, timeToLive;
+	bool isAlive;
+	Plane planos[6];
+
 
 	ParticleClass();
 
+	void Spawn();
+
 	void AccelerateParticle(float);
 
-	//Función que invierte la velocidad en algun eje en función del parametro
-	//0: Eje X 1: Eje Y 2: Eje Z
-	void Bounce(int);
+	void Die();
 
-	//Función que mueve la particula en función de sus vectores velocidad
+	void Bounce(Plane);
+
 	void MoveParticle(float);
-
-	//Función que inicializa la deteccion de colisiones de la partícula
-	//void StartPart(int numSquares,square* squareArray,sphere* aSphere, cylinder* aCylinder) {
-	//	planos = new square[numSquares];
-	//	esfera = aSphere;
-	//	cilindro = aCylinder;
-	//}
-
-	//~ParticleClass() {
-	//	delete planos;
-	//	delete esfera;
-	//	delete cilindro;
-	//}
 
 	void CheckCol();
 

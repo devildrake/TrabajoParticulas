@@ -43,9 +43,9 @@ void PhysicsInit() {
 	//Start
 	inc = 1;
 	for (int i = 0; i < LilSpheres::maxParticles; ++i) {
-		arrayParts[i].x =  partVerts[i * 3 + 0] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
-		arrayParts[i].y = partVerts[i * 3 + 1] = ((float)rand() / RAND_MAX) * 10.f;
-		arrayParts[i].z = partVerts[i * 3 + 2] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
+		arrayParts[i].orgX = arrayParts[i].x =  partVerts[i * 3 + 0] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
+		arrayParts[i].orgY = arrayParts[i].y = partVerts[i * 3 + 1] = ((float)rand() / RAND_MAX) * 10.f;
+		arrayParts[i].orgZ = arrayParts[i].z = partVerts[i * 3 + 2] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
 	}
 	firstPosAlive = lastPosAlive = 0;
 	//TODO
@@ -71,48 +71,69 @@ void PhysicsUpdate(float dt) {
 
 	if (flag) {
 		//Generar y petar particulas
-		firstPosAlive += inc;
-		lastPosAlive += inc;
-		firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
-		lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
+
+		//firstPosAlive += inc;
+		//lastPosAlive += inc;
+		//firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+		//lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
 
 			if (firstPosAlive > lastPosAlive) {
 
-				LilSpheres::updateParticles(firstPosAlive, LilSpheres::maxParticles-firstPosAlive, partVerts+firstPosAlive);
-				LilSpheres::updateParticles(0, lastPosAlive, partVerts);
 
 
 				for (int i = firstPosAlive; i < LilSpheres::maxParticles; ++i) {
+					if (!arrayParts[i].isAlive) {
+						firstPosAlive += inc;
+						lastPosAlive += inc;
+						firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+						lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
+						arrayParts[lastPosAlive].isAlive = true;
+					}
+					else {
+						arrayParts[i].UpdateParticle(dt);
 
-					std::cout << "y de " << i << " " << arrayParts[i].y << std::endl;
-					arrayParts[i].UpdateParticle(dt);
-
-
-					partVerts[i * 3] = arrayParts[i].x;
-					partVerts[i * 3 + 1] = arrayParts[i].y;
-					partVerts[i * 3 + 2] = arrayParts[i].z;
+						partVerts[i * 3] = arrayParts[i].x;
+						partVerts[i * 3 + 1] = arrayParts[i].y;
+						partVerts[i * 3 + 2] = arrayParts[i].z;
+					}
 				}
 				for (int i = 0; i < lastPosAlive; ++i) {
+					if (!arrayParts[i].isAlive) {
+						firstPosAlive += inc;
+						lastPosAlive += inc;
+						firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+						lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
+						arrayParts[lastPosAlive].isAlive = true;
+					}
+					else {
+						arrayParts[i].UpdateParticle(dt);
 
-					std::cout << "y de " << i << " " << arrayParts[i].y << std::endl;
-					arrayParts[i].UpdateParticle(dt);
 
-
-					partVerts[i * 3] = arrayParts[i].x;
-					partVerts[i * 3 + 1] = arrayParts[i].y;
-					partVerts[i * 3 + 2] = arrayParts[i].z;
+						partVerts[i * 3] = arrayParts[i].x;
+						partVerts[i * 3 + 1] = arrayParts[i].y;
+						partVerts[i * 3 + 2] = arrayParts[i].z;
+					}
 				}
+				//DRAW
+				LilSpheres::updateParticles(firstPosAlive, LilSpheres::maxParticles - firstPosAlive, partVerts + firstPosAlive);
+				LilSpheres::updateParticles(0, lastPosAlive, partVerts);
 			}
 			else {
 				for (int i = firstPosAlive; i < lastPosAlive; ++i) {
 
-					std::cout << "y de " << i << " " << arrayParts[i].y << std::endl;
-					arrayParts[i].UpdateParticle(dt);
-
-
-					partVerts[i * 3] = arrayParts[i].x;
-					partVerts[i * 3 + 1] = arrayParts[i].y;
-					partVerts[i * 3 + 2] = arrayParts[i].z;
+					if (!arrayParts[i].isAlive) {
+						firstPosAlive += inc;
+						lastPosAlive += inc;
+						arrayParts[lastPosAlive].isAlive = true;
+						firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+						lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
+					}
+					else {
+						arrayParts[i].UpdateParticle(dt);
+						partVerts[i * 3] = arrayParts[i].x;
+						partVerts[i * 3 + 1] = arrayParts[i].y;
+						partVerts[i * 3 + 2] = arrayParts[i].z;
+					}
 				}
 
 				LilSpheres::updateParticles(firstPosAlive, lastPosAlive, partVerts+firstPosAlive);
@@ -121,11 +142,9 @@ void PhysicsUpdate(float dt) {
 	
 	}
 	else {
-		for (int i = firstPosAlive; i < lastPosAlive; ++i) {
+		for (int i = firstPosAlive; i < lastPosAlive; i++) {
 
-			std::cout << "y de " << i << " " << arrayParts[i].y << std::endl;
 			arrayParts[i].UpdateParticle(dt);
-
 
 			partVerts[i * 3] = arrayParts[i].x;
 			partVerts[i * 3 + 1] = arrayParts[i].y;
@@ -133,6 +152,7 @@ void PhysicsUpdate(float dt) {
 		}
 	//Solo Generar particulas
 		
+		arrayParts[lastPosAlive].isAlive = true;
 		lastPosAlive += inc;
 		lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
 		LilSpheres::updateParticles(firstPosAlive, lastPosAlive, partVerts+firstPosAlive);
@@ -141,12 +161,12 @@ void PhysicsUpdate(float dt) {
 	}
 
 
-	std::cout << contador << "\n";
+//	std::cout << contador << "\n";
 	//TODO
 
-	std::cout << "First Pos Alive = " << firstPosAlive << "\n";
+//	std::cout << "First Pos Alive = " << firstPosAlive << "\n";
 
-	std::cout << "Last Pos Alive = " << lastPosAlive << "\n";
+//	std::cout << "Last Pos Alive = " << lastPosAlive << "\n";
 
 }
 void PhysicsCleanup() {

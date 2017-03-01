@@ -2,34 +2,18 @@
 
 ParticleClass::ParticleClass() {
 	x = y = z = 0;
+	timeToLive = 1.0f;
+	timeAlive = 0.0f;
 	vx = vy = vz = 0;
-	mass = 1;
-	//square* planos;
-	//cylinder* cilindro;
-	//
+	isAlive = false;
 }
 
+//Función que aplica la gravedad sobre el vector velocidad Y de la partícula
 void ParticleClass::AccelerateParticle(float dt) {
 	vy -= 9.81*dt;
 }
 
-//Función que invierte la velocidad en algun eje en función del parametro
-//0: Eje X 1: Eje Y 2: Eje Z
-void ParticleClass::Bounce(int which) {
-	switch (which) {
-	case 0:
-		vx = -vx;
-		break;
-	case 1:
-		vy = -vx;
-		break;
-	case 2:
-		vz = -vx;
-		break;
-	default:
-		std::cout << "Invalid Option" << std::endl;
-		break;
-	}
+void ParticleClass::Bounce(Plane plano) {
 
 }
 
@@ -40,25 +24,34 @@ void ParticleClass::MoveParticle(float dt) {
 	z += vz*dt;
 }
 
-//Función que inicializa la deteccion de colisiones de la partícula
-//void ParticleClass:: StartPart(int numSquares,square* squareArray,sphere* aSphere, cylinder* aCylinder) {
-//	planos = new square[numSquares];
-//	esfera = aSphere;
-//	cilindro = aCylinder;
-//}
-
-//ParticleClass::~ParticleClass() {
-//	delete planos;
-//	delete esfera;
-//	delete cilindro;
-//}
-
 void ParticleClass::CheckCol() {
 
 }
 
+void ParticleClass::Spawn() {
+	if (!isAlive) {
+		isAlive = true;
+	}
+}
+
+void ParticleClass::Die() {
+	isAlive = false;
+	timeAlive = 0;
+	vx = vy = vz = 0;
+	x = orgX;
+	y = orgY;
+	z = orgZ;
+	std::cout << "Diededed" << std::endl;
+}
+
 void ParticleClass::UpdateParticle(float dt) {
-	MoveParticle(dt);
-	AccelerateParticle(dt);
+	if (isAlive) {
+		timeAlive += dt;
+		MoveParticle(dt);
+		AccelerateParticle(dt);
+		if(timeAlive>=timeToLive){
+			Die();
+		}
+	}
 }
 
