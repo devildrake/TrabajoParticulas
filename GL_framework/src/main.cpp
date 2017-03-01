@@ -4,8 +4,8 @@
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_glfw_gl3.h>
 #include <cstdio>
-
 #include "GL_framework.h"
+#include "ParticleClass.h"
 
 static GLFWwindow *window;
 

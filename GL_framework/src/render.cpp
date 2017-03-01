@@ -167,6 +167,8 @@ float cubeVerts[] = {
 	 5.f,  0.f, -5.f,
 	 5.f,  0.f,  5.f,
 	-5.f,  0.f,  5.f,
+
+	//PLANO SUPERIOR DEFINIDO POR 4 puntos
 	-5.f, 10.f, -5.f,
 	 5.f, 10.f, -5.f,
 	 5.f, 10.f,  5.f,
