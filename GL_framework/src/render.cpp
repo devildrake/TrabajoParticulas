@@ -668,7 +668,7 @@ GLuint particlesVao;
 GLuint particlesVbo;
 float radius;
 int numparticles;
-extern const int maxParticles = 10;//SHRT_MAX;
+extern const int maxParticles = 20000;//SHRT_MAX;
 
 void setupParticles(int numTotalParticles, float radius) {
 	assert(numTotalParticles > 0);

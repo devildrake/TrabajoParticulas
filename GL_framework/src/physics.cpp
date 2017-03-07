@@ -15,11 +15,12 @@ namespace LilSpheres {
 
 bool show_test_window = true;
 int firstPosAlive;
-int lastPosAlive;
-bool flag = false;
-float contador;
+int firstDead;
 int inc;
+int contadorParticulas;
 
+ParticleClass::tipoMov tipoMov;
+ParticleClass::solucionMov sol;
 ParticleClass* arrayParts = new ParticleClass[LilSpheres::maxParticles];
 float *partVerts = new float[LilSpheres::maxParticles * 3];
 
@@ -37,138 +38,105 @@ void GUI() {
 	}
 }
 
-
-
 void PhysicsInit() {
 	//Start
+	contadorParticulas = 0;
+	tipoMov = ParticleClass::tipoMov::CASCADA;
+	sol = ParticleClass::solucionMov::EULER;
 	inc = 1;
 	for (int i = 0; i < LilSpheres::maxParticles; ++i) {
 		arrayParts[i].orgX = arrayParts[i].x =  partVerts[i * 3 + 0] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
 		arrayParts[i].orgY = arrayParts[i].y = partVerts[i * 3 + 1] = ((float)rand() / RAND_MAX) * 10.f;
 		arrayParts[i].orgZ = arrayParts[i].z = partVerts[i * 3 + 2] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
+
+		//arrayParts[i].orgX = arrayParts[i].x = 0;
+		//arrayParts[i].orgY = arrayParts[i].y = 5;
+		//arrayParts[i].orgZ = arrayParts[i].z = 0;
+
 	}
-	firstPosAlive = lastPosAlive = 0;
+	firstPosAlive = firstDead = 0;
 	//TODO
 }
 
+float spawnCounter=0;
+
+void SpawnParticles(float dt) {
+	spawnCounter += dt;
+	if (spawnCounter > 0.2f)
+	{
+		contadorParticulas += inc;
+		int a = 0;
+		while (a < inc) {
+			arrayParts[firstDead].isAlive = true;
+			arrayParts[firstDead].vx = (float)((rand()*4.5f) + 0.5f);
+			arrayParts[firstDead].vy = (float)((rand()*0.5) - 0.3f);
+			arrayParts[firstDead].vz = (float)((rand()*2.0f) - 1.0f);
+			firstDead += inc;
+			firstDead = firstDead%LilSpheres::maxParticles;
+			spawnCounter = 0;
+			a++;
+		}
+	}
+}
+
+void UpdateAliveParticles(float dt) {
+	if (firstPosAlive > firstDead) {
+		for (int i = 0; i < firstDead; i++) {
+			if (!arrayParts[i].isAlive) {
+				firstPosAlive++;
+				firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+			}
+			else {
+				arrayParts[i].UpdateParticle(dt, sol);
+			}
+		}
+		for (int i = firstPosAlive; i < LilSpheres::maxParticles; i++) {
+			if (!arrayParts[i].isAlive) {
+				firstPosAlive++;
+				firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+			}
+			else {
+				arrayParts[i].UpdateParticle(dt, sol);
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < firstDead; i++) {
+			if (!arrayParts[i].isAlive) {
+				firstPosAlive++;
+				firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
+			}
+			else {
+				arrayParts[i].UpdateParticle(dt, sol);
+			}
+		}
+	}
+
+	if (firstPosAlive > firstDead) {
+
+			LilSpheres::updateParticles(0,contadorParticulas-firstDead,&partVerts[firstPosAlive]);
+			LilSpheres::updateParticles(0, contadorParticulas - firstPosAlive, &partVerts[firstDead]);
+		
+
+		
+	}
+	else {
+
+	}
+
+
+
+
+}
 
 void PhysicsUpdate(float dt) {
 
-	contador += dt;
-
-	//HAY QUE MANEJAR LA EXCEPCION DEL RESETEO
-	
-	if (contador > 5) {
-		//Flag es false hasta que el contador llega a 5 
-		flag = true;
-	}
-
-	if (contador > 20) {
-		//El contador reinicia al llegar a 20
-		contador = 0;
-
-	}
-
-	if (flag) {
-		//Generar y petar particulas
-
-		//firstPosAlive += inc;
-		//lastPosAlive += inc;
-		//firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
-		//lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
-
-			if (firstPosAlive > lastPosAlive) {
-
-
-
-				for (int i = firstPosAlive; i < LilSpheres::maxParticles; ++i) {
-					if (!arrayParts[i].isAlive) {
-						firstPosAlive += inc;
-						lastPosAlive += inc;
-						firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
-						lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
-						arrayParts[lastPosAlive].isAlive = true;
-					}
-					else {
-						arrayParts[i].UpdateParticle(dt);
-
-						partVerts[i * 3] = arrayParts[i].x;
-						partVerts[i * 3 + 1] = arrayParts[i].y;
-						partVerts[i * 3 + 2] = arrayParts[i].z;
-					}
-				}
-				for (int i = 0; i < lastPosAlive; ++i) {
-					if (!arrayParts[i].isAlive) {
-						firstPosAlive += inc;
-						lastPosAlive += inc;
-						firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
-						lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
-						arrayParts[lastPosAlive].isAlive = true;
-					}
-					else {
-						arrayParts[i].UpdateParticle(dt);
-
-
-						partVerts[i * 3] = arrayParts[i].x;
-						partVerts[i * 3 + 1] = arrayParts[i].y;
-						partVerts[i * 3 + 2] = arrayParts[i].z;
-					}
-				}
-				//DRAW
-				LilSpheres::updateParticles(firstPosAlive, LilSpheres::maxParticles - firstPosAlive, partVerts + firstPosAlive);
-				LilSpheres::updateParticles(0, lastPosAlive, partVerts);
-			}
-			else {
-				for (int i = firstPosAlive; i < lastPosAlive; ++i) {
-
-					if (!arrayParts[i].isAlive) {
-						firstPosAlive += inc;
-						lastPosAlive += inc;
-						arrayParts[lastPosAlive].isAlive = true;
-						firstPosAlive = firstPosAlive%LilSpheres::maxParticles;
-						lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
-					}
-					else {
-						arrayParts[i].UpdateParticle(dt);
-						partVerts[i * 3] = arrayParts[i].x;
-						partVerts[i * 3 + 1] = arrayParts[i].y;
-						partVerts[i * 3 + 2] = arrayParts[i].z;
-					}
-				}
-
-				LilSpheres::updateParticles(firstPosAlive, lastPosAlive, partVerts+firstPosAlive);
-
-			}
-	
-	}
-	else {
-		for (int i = firstPosAlive; i < lastPosAlive; i++) {
-
-			arrayParts[i].UpdateParticle(dt);
-
-			partVerts[i * 3] = arrayParts[i].x;
-			partVerts[i * 3 + 1] = arrayParts[i].y;
-			partVerts[i * 3 + 2] = arrayParts[i].z;
-		}
-	//Solo Generar particulas
-		
-		arrayParts[lastPosAlive].isAlive = true;
-		lastPosAlive += inc;
-		lastPosAlive = lastPosAlive%LilSpheres::maxParticles;
-		LilSpheres::updateParticles(firstPosAlive, lastPosAlive, partVerts+firstPosAlive);
-
-	
-	}
-
-
-//	std::cout << contador << "\n";
-	//TODO
-
-//	std::cout << "First Pos Alive = " << firstPosAlive << "\n";
-
-//	std::cout << "Last Pos Alive = " << lastPosAlive << "\n";
-
+	SpawnParticles(dt);
+	UpdateAliveParticles(dt);
+//	LilSpheres::updateParticles()
 }
+
+
 void PhysicsCleanup() {
 	delete[] partVerts;
 	//OnDestroy
