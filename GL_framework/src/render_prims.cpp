@@ -1,6 +1,7 @@
 #include <GL\glew.h>
 #include <glm\gtc\type_ptr.hpp>
 #include <glm\gtc\matrix_transform.hpp>
+#include <iostream>
 #include <cstdio>
 
 //Boolean variables allow to show/hide the primitives
@@ -61,15 +62,15 @@ void renderPrims() {
 
 	//TODO drawParticles can only draw a contiguous amount of particles in its array from start idx to idx+count
 	//Depending the alive particles that have to be rendered, you may need to do multiple calls for this function
-	extern int lastPosAlive;
 	extern int firstPosAlive;
+	extern int firstDead;
 	if (renderParticles) {
 		//LilSpheres::drawParticles(0, LilSpheres::maxParticles);
-		if (lastPosAlive > firstPosAlive) {
-			LilSpheres::drawParticles(firstPosAlive, lastPosAlive - firstPosAlive);
+		if (firstDead > firstPosAlive) {
+			LilSpheres::drawParticles(firstPosAlive, firstDead-firstPosAlive);
 		}else{
 			LilSpheres::drawParticles(firstPosAlive, LilSpheres::maxParticles-1 -firstPosAlive);
-			LilSpheres::drawParticles(0, lastPosAlive);
+			LilSpheres::drawParticles(0, firstDead);
 
 			}
 		//
