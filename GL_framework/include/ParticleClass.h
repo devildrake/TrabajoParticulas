@@ -3,6 +3,8 @@
 class ParticleClass {
 private:
 
+	
+public:
 	class Plane {
 	public:
 
@@ -11,14 +13,20 @@ private:
 		Plane() {
 			d = nx = ny = nz = 0;
 		}
-		Plane(float d,float nx, float ny, float nz) {
+		Plane(float nx, float ny, float nz, float d) {
+			this->nx = nx;
+			this->ny = ny;
+			this->nz = nz;
+			this->d = d;
+		}
+		void SetPlaneStats(float nx, float ny, float nz, float d) {
 			this->nx = nx;
 			this->ny = ny;
 			this->nz = nz;
 			this->d = d;
 		}
 	};
-public:
+
 	float orgX, orgY, orgZ;//Atributos iniciales de posicion
 	float x, y, z; //Atributos de posición
 	float prevX, prevY, prevZ;
@@ -34,15 +42,20 @@ public:
 
 	ParticleClass();
 
+
+	void ColPlane(Plane, float);
+
+	void ColSphere(float,float,float,float,float);
+
 	void Accelerate(float);
 
 	void Die();
 
-	void Bounce(Plane);
+	void Bounce(Plane,float);
 
 	void MoveParticle(float, solucionMov);
 
-	void CheckCol();
+	void CheckCol(float);
 
 	void UpdateParticle(float, solucionMov);
 
