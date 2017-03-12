@@ -4,8 +4,8 @@ ParticleClass::ParticleClass() {
 	x = y = z = 0;
 	vx = vy = vz = 0;
 	ax = az = 0;
-	ay = -9.81f;
-	timeToLive = 1.5f;
+	ay = -5.81f;
+	timeToLive = 2.5f;
 	timeAlive = 0.0f;
 	isAlive = false;
 	doOnce = false;
@@ -21,17 +21,66 @@ ParticleClass::ParticleClass() {
 //Función que aplica la gravedad sobre el vector velocidad Y de la partícula
 
 void ParticleClass::Bounce(Plane plano,float dt) {
+	//Aqui entra
+	
+	//REFLEJAR NUEVA POSICION
+	//x = x - 2 * (plano.nx*x + plano.d)*plano.nx;
+	//y = y - 2 * (plano.ny*y + plano.d)*plano.ny;
+	//z = z - 2 * (plano.nz*z + plano.d)*plano.nz;
+	//
+	//antX = antX - 2 * (plano.nx*antX + plano.d)*plano.nx;
+	//antY = antY - 2 * (plano.ny*antY + plano.d)*plano.ny;
+	//antZ = antZ - 2 * (plano.nz*antZ + plano.d)*plano.nz;
 
-	printf("Deberia rebotar\n");
+	//vx = (x - antX) / dt;
+	//vy = (y - antY) / dt;
+	//vz = (z - antZ) / dt;
+	//vx = vx - 2 * (plano.nx * vx)*plano.nx;
+	//vy = vy - 2 * (plano.ny * vy)*plano.ny;
+	//vz = vz - 2 * (plano.nz * vz)*plano.nz;
+	//ESTO DE AQUI ARRIBA DEBERIA FUNCIONAR PERO SE LE VA CUANDO COLISIONA
 
-	//EN TEORIA (CREO QUE) ESTO ES EL REBOTE CON EL PLANO SEGUN LOS POWER POINTS ALOMEJOR ESTA MAL APLICADA PORQUE NO ME ACLARABA SI ERA UN PRODUCTO VECTORIAL O QUE
-	//vx = vx+ax*dt - 2 * (plano.nx*vx+ax*dt)*plano.nx;
-	//vy = vy+ay*dt - 2 * (plano.ny*vy + ay*dt)*plano.ny;
-	//vz = vz+ax*dt - 2 * (plano.nz*vz + az*dt)*plano.nz;
+	//FORMA MAL DE HACERLO PERO QUE DEBERIA FUNCIONAR (esto es solo para el cubo)
+	//colision suelo
+	if (y <= 1) {
+		vy = -vy;
+		y = 1;
+	}
+	//colision con la cara izquierda
+	if (x <= -4) {
+		vx = -vx;
+		x = -4;
+	}
+	//colision cara derecha
+	if (x >= 5) {
+		vx = -vx;
+		x = 5;
+	}
+	//colision cara frontal
+	if (z >= 5) {
+		vz = -vz;
+		z = 5;
+	}
+	//colision cara trasera
+	if (z <= -5) {
+		vz = -vz;
+		z = -5;
+	}
+	//colision arriba
+	if (y >= 10) {
+		vy = -vy;
+		y = 10;
+	}
+	//std::cout << x << ", " << y << ", " << z << std::endl;
 
-	//x = x + vx*dt - 2 * (plano.nx*x + vx*dt + plano.d)*plano.nx;
-	//y = y + vy*dt - 2 * (plano.ny*x + vy*dt + plano.d)*plano.ny;
-	//z = z + vz*dt - 2 * (plano.nz*z + vz*dt + plano.d)*plano.nz;
+	//COLISION CON LA ESFERA
+	x = x - 2 * (plano.nx*x + plano.d)*plano.nx;
+	y = y - 2 * (plano.ny*y + plano.d)*plano.ny;
+	z = z - 2 * (plano.nz*z + plano.d)*plano.nz;
+
+	vx = vx - 2 * (plano.nx * vx)*plano.nx;
+	vy = vy - 2 * (plano.ny * vy)*plano.ny;
+	vz = vz - 2 * (plano.nz * vz)*plano.nz;
 }
 
 void ParticleClass::Accelerate(float dt) {
@@ -42,11 +91,21 @@ void ParticleClass::Accelerate(float dt) {
 
 //Función que mueve la particula en función de sus vectores velocidad
 void ParticleClass::MoveParticle(float dt, solucionMov type) {
+	float tempX, tempY, tempZ;
+	
 	if(type == EULER){
 		doOnce = false;
+		tempX = x;
+		tempY = y;
+		tempZ = z;
+
 		x = x + vx*dt;
 		y = y + vy*dt;
 		z = z + vz*dt;
+
+		antX = tempX;
+		antY = tempY;
+		antZ = tempZ;
 
 		Accelerate(dt);
 		CheckCol(dt);
@@ -56,7 +115,6 @@ void ParticleClass::MoveParticle(float dt, solucionMov type) {
 			VerletStartup(dt);
 			doOnce = true;
 		}
-		float tempX, tempY, tempZ;
 		tempX = x;
 		tempY = y;
 		tempZ = z;
@@ -68,6 +126,9 @@ void ParticleClass::MoveParticle(float dt, solucionMov type) {
 		antX = tempX;
 		antY = tempY;
 		antZ = tempZ;
+
+		Accelerate(dt);
+		CheckCol(dt);
 	}
 }
 
@@ -85,12 +146,16 @@ void ParticleClass::ColPlane(Plane plano,float dt)
 		Bounce(plano, dt);
 	}
 }
-void ParticleClass::ColSphere(float centerX,float centerY,float centerZ, float radius, float dt) {
-	if ((centerX - x + radius)*(centerX - x*vx*dt + radius) <= 0 && (centerY - y + radius)*(centerY - y*vy*dt + radius) <= 0&& (centerZ - z + radius)*(centerZ - z*vz*dt + radius) <= 0) {
-		printf("ColisionConEsfera");
-		//AQUI HABRIA QUE CALCULAR EL PUNTO EXACTO EN EL QUE LA PARTÍCULA HA COLISIONADO CON LA ESFERA
-		//PARA PODER CALCULAR EL PLANO TANGENTE, QUE TENDRA COMO VECTOR NORMAL EL VECTOR DESDE EL CENTRO DE LA ESFERA HASTA EL PUNTO DE COLISION
 
+void ParticleClass::ColSphere(float centerX,float centerY,float centerZ, float radius, float dt) {
+	float tNX, tNY, tNZ, tD; //componentes del plano tangente, vector normal y D
+	if ((abs(centerX - x)<radius)&& (abs(centerY - y) < radius) && (abs(centerZ - z) < radius)) {
+		//YA DETECTA BIEN LA COLISION CON LA ESFERA
+		tNX = x - centerX;
+		tNY = y - centerY;
+		tNZ = z - centerZ;
+		tD = (tNX * x) + (tNY * y) + (tNZ * z);
+		Bounce(Plane(tNX,tNY,tNZ,tD), dt);
 	}
 }
 
@@ -98,6 +163,7 @@ void ParticleClass::CheckCol(float dt) {
 	for (int i = 0; i < 6; i++) {
 		ColPlane(planos[i],dt);
 	}
+	ColSphere(.0f, 1.f, 0.f, 1.f, dt);
 }
 extern int contadorParticulas;
 extern int firstPosAlive;

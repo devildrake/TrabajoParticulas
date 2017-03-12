@@ -1,5 +1,8 @@
 #pragma once
 #include <iostream>
+#include <glm\vec3.hpp>
+#include <glm\glm.hpp>
+
 class ParticleClass {
 private:
 	bool doOnce;

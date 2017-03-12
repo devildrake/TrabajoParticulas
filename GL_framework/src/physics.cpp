@@ -81,7 +81,7 @@ void SpawnParticles(float dt) {
 
 			arrayParts[firstDead].isAlive = true;
 			if (tipoMov == ParticleClass::tipoMov::CASCADA) {
-				arrayParts[firstDead].vx = ((float)rand() / RAND_MAX) -5.0f;
+				arrayParts[firstDead].vx = ((float)rand() / RAND_MAX) -4.0f;
 				arrayParts[firstDead].vy = ((float)rand() / RAND_MAX) - 1.0f;
 				arrayParts[firstDead].vz = ((float)rand() / RAND_MAX)*4-2;
 			}
