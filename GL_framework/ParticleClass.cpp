@@ -4,7 +4,7 @@ ParticleClass::ParticleClass() {
 	x = y = z = 0;
 	vx = vy = vz = 0;
 	ax = az = 0;
-	ay = -5.81f;
+	ay = -9.81f;
 	timeToLive = 2.5f;
 	timeAlive = 0.0f;
 	isAlive = false;
@@ -40,37 +40,7 @@ void ParticleClass::Bounce(Plane plano,float dt) {
 	//vz = vz - 2 * (plano.nz * vz)*plano.nz;
 	//ESTO DE AQUI ARRIBA DEBERIA FUNCIONAR PERO SE LE VA CUANDO COLISIONA
 
-	//FORMA MAL DE HACERLO PERO QUE DEBERIA FUNCIONAR (esto es solo para el cubo)
-	//colision suelo
-	if (y <= 1) {
-		vy = -vy;
-		y = 1;
-	}
-	//colision con la cara izquierda
-	if (x <= -4) {
-		vx = -vx;
-		x = -4;
-	}
-	//colision cara derecha
-	if (x >= 5) {
-		vx = -vx;
-		x = 5;
-	}
-	//colision cara frontal
-	if (z >= 5) {
-		vz = -vz;
-		z = 5;
-	}
-	//colision cara trasera
-	if (z <= -5) {
-		vz = -vz;
-		z = -5;
-	}
-	//colision arriba
-	if (y >= 10) {
-		vy = -vy;
-		y = 10;
-	}
+	
 	//std::cout << x << ", " << y << ", " << z << std::endl;
 
 	//COLISION CON LA ESFERA
@@ -138,12 +108,37 @@ void ParticleClass::VerletStartup(float dt) {
 	antZ = z - vz*dt;
 }
 
-//Método que recibe un plano y el delta time y determina si ha habido colision con ese plano
-void ParticleClass::ColPlane(Plane plano,float dt) 
-{
-	if ((((plano.nx*x + plano.ny*y + plano.nz + z) + plano.d)*((plano.nx*(x + vx*dt) + plano.ny*(y + vy*dt) + plano.nz*(z + vz*dt)) + plano.d)) <= 0)
-	{
-		Bounce(plano, dt);
+void ParticleClass::ColPlane(){
+	//FORMA MAL DE HACERLO PERO QUE DEBERIA FUNCIONAR (esto es solo para el cubo)
+	//colision suelo
+	if (y <= 1) {
+		vy = -vy;
+		y = 1;
+	}
+	//colision con la cara izquierda
+	if (x <= -4) {
+		vx = -vx;
+		x = -4;
+	}
+	//colision cara derecha
+	if (x >= 5) {
+		vx = -vx;
+		x = 5;
+	}
+	//colision cara frontal
+	if (z >= 5) {
+		vz = -vz;
+		z = 5;
+	}
+	//colision cara trasera
+	if (z <= -5) {
+		vz = -vz;
+		z = -5;
+	}
+	//colision arriba
+	if (y >= 10) {
+		vy = -vy;
+		y = 10;
 	}
 }
 
@@ -154,15 +149,13 @@ void ParticleClass::ColSphere(float centerX,float centerY,float centerZ, float r
 		tNX = x - centerX;
 		tNY = y - centerY;
 		tNZ = z - centerZ;
-		tD = (tNX * x) + (tNY * y) + (tNZ * z);
+		tD = -((tNX * x) + (tNY * y) + (tNZ * z));
 		Bounce(Plane(tNX,tNY,tNZ,tD), dt);
 	}
 }
 
 void ParticleClass::CheckCol(float dt) {
-	for (int i = 0; i < 6; i++) {
-		ColPlane(planos[i],dt);
-	}
+	ColPlane();
 	ColSphere(.0f, 1.f, 0.f, 1.f, dt);
 }
 extern int contadorParticulas;
