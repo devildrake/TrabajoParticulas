@@ -108,38 +108,58 @@ void ParticleClass::VerletStartup(float dt) {
 	antZ = z - vz*dt;
 }
 
-void ParticleClass::ColPlane(){
+void ParticleClass::ColPlane(float dt){
 	//FORMA MAL DE HACERLO PERO QUE DEBERIA FUNCIONAR (esto es solo para el cubo)
 	//colision suelo
 	if (y <= 1) {
 		vy = -vy;
 		y = 1;
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
 	//colision con la cara izquierda
 	if (x <= -4) {
 		vx = -vx;
 		x = -4;
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
 	//colision cara derecha
 	if (x >= 5) {
 		vx = -vx;
 		x = 5;
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
 	//colision cara frontal
 	if (z >= 5) {
 		vz = -vz;
 		z = 5;
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
 	//colision cara trasera
 	if (z <= -5) {
 		vz = -vz;
 		z = -5;
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
 	//colision arriba
 	if (y >= 10) {
 		vy = -vy;
 		y = 10;
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
+
+	
 }
 
 void ParticleClass::ColSphere(float centerX,float centerY,float centerZ, float radius, float dt) {
@@ -151,12 +171,55 @@ void ParticleClass::ColSphere(float centerX,float centerY,float centerZ, float r
 		tNZ = z - centerZ;
 		tD = -((tNX * x) + (tNY * y) + (tNZ * z));
 		Bounce(Plane(tNX,tNY,tNZ,tD), dt);
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
+	}
+}
+
+void ParticleClass::ColCapsule(float dt) {
+	//Los 2 centros de las dos semiesferas y el radio de la capsula.
+	float posAX = -3.f;
+	float posAY = 2.f;
+	float posAZ = -2.f;
+	float posBX = -4.f;
+	float posBY = 2.f;
+	float posBZ = 2.f;
+	float radius = 1.f;
+	float QX, QY, QZ; //punto mas cercano del segmento AB de la capsula.
+
+	float ABX, ABY, ABZ; //Componentes del vector AB
+	ABX = posBX - posAX;
+	ABY = posBY - posAY;
+	ABZ = posBZ - posAZ;
+
+	float APX, APY, APZ; //componentes del vector AP, desde A hasta nuestra particula P
+	APX = x - posAX;
+	APY = y - posAY;
+	APZ = z - posAZ;
+
+	QX = posAX + glm::clamp(((ABX*APX) + (ABY*APY) + (ABZ*APZ)) / (sqrt((ABX*ABX) + (ABY*ABY) + (ABZ*ABZ))), 0.f, 1.f)*ABX;
+	QY = posAY + glm::clamp(((ABX*APX) + (ABY*APY) + (ABZ*APZ)) / (sqrt((ABX*ABX) + (ABY*ABY) + (ABZ*ABZ))), 0.f, 1.f)*ABY;
+	QZ = posAZ + glm::clamp(((ABX*APX) + (ABY*APY) + (ABZ*APZ)) / (sqrt((ABX*ABX) + (ABY*ABY) + (ABZ*ABZ))), 0.f, 1.f)*ABZ;
+
+	float tNX, tNY, tNZ, tD; //componentes del plano tangente, vector normal y D
+
+	if ((abs(QX - x) < radius) && (abs(QY - y) < radius) && (abs(QZ - z) < radius)) {
+		tNX = x - QX;
+		tNY = y - QY;
+		tNZ = z - QZ;
+		tD = -((tNX * x) + (tNY * y) + (tNZ * z));
+		Bounce(Plane(tNX, tNY, tNZ, tD), dt);
+		antX = x - vx*dt;
+		antY = y - vy*dt;
+		antZ = z - vy*dt;
 	}
 }
 
 void ParticleClass::CheckCol(float dt) {
-	ColPlane();
+	ColPlane(dt);
 	ColSphere(.0f, 1.f, 0.f, 1.f, dt);
+	ColCapsule(dt);
 }
 extern int contadorParticulas;
 extern int firstPosAlive;

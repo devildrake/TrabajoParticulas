@@ -48,7 +48,9 @@ public:
 	ParticleClass();
 
 
-	void ColPlane();
+	void ColPlane(float);
+
+	void ColCapsule(float);
 
 	void ColSphere(float,float,float,float,float);
 
