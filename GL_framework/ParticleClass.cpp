@@ -8,6 +8,7 @@ ParticleClass::ParticleClass() {
 	timeToLive = 1.5f;
 	timeAlive = 0.0f;
 	isAlive = false;
+	doOnce = false;
 	mass = 1;
 	planos[0].SetPlaneStats(0.0f,100.0f,0.0f,0.0f); // Parte abajo del cubo
 	planos[1].SetPlaneStats(0.0f, 0.0f, -100.0f, -500.0f);
@@ -42,6 +43,7 @@ void ParticleClass::Accelerate(float dt) {
 //Función que mueve la particula en función de sus vectores velocidad
 void ParticleClass::MoveParticle(float dt, solucionMov type) {
 	if(type == EULER){
+		doOnce = false;
 		x = x + vx*dt;
 		y = y + vy*dt;
 		z = z + vz*dt;
@@ -50,8 +52,29 @@ void ParticleClass::MoveParticle(float dt, solucionMov type) {
 		CheckCol(dt);
 	}
 	else {
+		if (!doOnce) {
+			VerletStartup(dt);
+			doOnce = true;
+		}
+		float tempX, tempY, tempZ;
+		tempX = x;
+		tempY = y;
+		tempZ = z;
 
+		x = x + (x - antX) + ax *(dt*dt);
+		y = y + (y - antY) + ay *(dt*dt);
+		z = z + (z - antZ) + az *(dt*dt);
+
+		antX = tempX;
+		antY = tempY;
+		antZ = tempZ;
 	}
+}
+
+void ParticleClass::VerletStartup(float dt) {
+	antX = x - vx*dt;
+	antY = y - vy*dt;
+	antZ = z - vz*dt;
 }
 
 //Método que recibe un plano y el delta time y determina si ha habido colision con ese plano
@@ -91,6 +114,8 @@ void ParticleClass::Die() {
 	y = orgY;
 	z = orgZ;
 //	std::cout << "Diededed" << std::endl;
+
+	doOnce = false;
 }
 
 void ParticleClass::UpdateParticle(float dt, ParticleClass::solucionMov type) {
